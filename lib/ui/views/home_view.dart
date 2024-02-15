@@ -57,6 +57,12 @@ class _HomeViewState extends State<HomeView> {
     _categoryBox?.add(Category(name, items));
   }
 
+  void _deleteAll() async {
+    final rec = _categoryBox?.values.first;
+
+    rec?.delete();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -91,10 +97,13 @@ class _HomeViewState extends State<HomeView> {
                   },
                 )),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _addRecord('Music', {
-          'Rock': 'Details about rock',
-          'Hip Hop': 'Details about hip hop',
-          'Classic': 'Details about classic',
+        onPressed: () => _addRecord('Games', {
+          'Halo':
+              'Halo is a military science fiction media franchise, originally created and developed by Bungie and currently managed and developed by 343 Industries, part of Microsoft',
+          'The Witcher':
+              'The Witcher (Polish: Wiedźmin [ˈvʲɛd͡ʑmʲin] (Warlock)) is a 2007 action role-playing game developed by CD Projekt Red for Microsoft Windows and CD Projekt on OS X.',
+          'THE FINALS':
+              'The Finals, stylized in all caps as THE FINALS, is a free-to-play first-person shooter, developed and published by Nexon subsidiary Embark Studios.',
         }),
         tooltip: 'Increment',
         child: const Icon(Icons.add),
