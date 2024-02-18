@@ -73,6 +73,12 @@ class _HomeViewState extends State<HomeView> {
   }
 
   @override
+  void disposeState() {
+    super.dispose();
+    _controller.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
