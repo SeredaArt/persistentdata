@@ -65,7 +65,7 @@ class _HomeViewState extends State<HomeView> {
                 subtitle: Text(
                   '${user.years} - ${user.phone}',
                 ),
-                trailing: Row(children: [
+                trailing: Wrap(children: [
                   IconButton(
                       onPressed: () {},
                       icon: Icon(Icons.change_circle_outlined)),
@@ -82,8 +82,10 @@ class _HomeViewState extends State<HomeView> {
         stream: _dataBase.usersStream,
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => () {
-          Navigator.of(context).pushNamed('/add_user');
+        onPressed: () {
+          setState(() {
+            Navigator.of(context).pushNamed('/add_user');
+          });
         },
         tooltip: 'Increment',
         child: const Icon(Icons.add),

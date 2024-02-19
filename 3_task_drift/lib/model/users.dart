@@ -7,7 +7,7 @@ import 'dart:io';
 part 'users.g.dart';
 
 class Users extends Table {
-    IntColumn get id => integer().autoIncrement()();
+  IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text().withLength(min: 1, max: 32)();
   TextColumn get lastname => text().withLength(min: 1, max: 32)();
   IntColumn get years => integer().nullable()();
