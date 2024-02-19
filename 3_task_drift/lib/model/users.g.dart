@@ -37,8 +37,8 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
   static const VerificationMeta _yearsMeta = const VerificationMeta('years');
   @override
   late final GeneratedColumn<int> years = GeneratedColumn<int>(
-      'years', aliasedName, true,
-      type: DriftSqlType.int, requiredDuringInsert: false);
+      'years', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
   static const VerificationMeta _imageMeta = const VerificationMeta('image');
   @override
   late final GeneratedColumn<String> image = GeneratedColumn<String>(
@@ -46,14 +46,14 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
       type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _phoneMeta = const VerificationMeta('phone');
   @override
-  late final GeneratedColumn<int> phone = GeneratedColumn<int>(
-      'phone', aliasedName, true,
-      type: DriftSqlType.int, requiredDuringInsert: false);
+  late final GeneratedColumn<String> phone = GeneratedColumn<String>(
+      'phone', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _cardMeta = const VerificationMeta('card');
   @override
-  late final GeneratedColumn<int> card = GeneratedColumn<int>(
-      'card', aliasedName, true,
-      type: DriftSqlType.int, requiredDuringInsert: false);
+  late final GeneratedColumn<String> card = GeneratedColumn<String>(
+      'card', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns =>
       [id, name, lastname, years, image, phone, card];
@@ -85,6 +85,8 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     if (data.containsKey('years')) {
       context.handle(
           _yearsMeta, years.isAcceptableOrUnknown(data['years']!, _yearsMeta));
+    } else if (isInserting) {
+      context.missing(_yearsMeta);
     }
     if (data.containsKey('image')) {
       context.handle(
@@ -95,10 +97,14 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
     if (data.containsKey('phone')) {
       context.handle(
           _phoneMeta, phone.isAcceptableOrUnknown(data['phone']!, _phoneMeta));
+    } else if (isInserting) {
+      context.missing(_phoneMeta);
     }
     if (data.containsKey('card')) {
       context.handle(
           _cardMeta, card.isAcceptableOrUnknown(data['card']!, _cardMeta));
+    } else if (isInserting) {
+      context.missing(_cardMeta);
     }
     return context;
   }
@@ -116,13 +122,13 @@ class $UsersTable extends Users with TableInfo<$UsersTable, User> {
       lastname: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}lastname'])!,
       years: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}years']),
+          .read(DriftSqlType.int, data['${effectivePrefix}years'])!,
       image: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}image'])!,
       phone: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}phone']),
+          .read(DriftSqlType.string, data['${effectivePrefix}phone'])!,
       card: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}card']),
+          .read(DriftSqlType.string, data['${effectivePrefix}card'])!,
     );
   }
 
@@ -136,34 +142,28 @@ class User extends DataClass implements Insertable<User> {
   final int id;
   final String name;
   final String lastname;
-  final int? years;
+  final int years;
   final String image;
-  final int? phone;
-  final int? card;
+  final String phone;
+  final String card;
   const User(
       {required this.id,
       required this.name,
       required this.lastname,
-      this.years,
+      required this.years,
       required this.image,
-      this.phone,
-      this.card});
+      required this.phone,
+      required this.card});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['name'] = Variable<String>(name);
     map['lastname'] = Variable<String>(lastname);
-    if (!nullToAbsent || years != null) {
-      map['years'] = Variable<int>(years);
-    }
+    map['years'] = Variable<int>(years);
     map['image'] = Variable<String>(image);
-    if (!nullToAbsent || phone != null) {
-      map['phone'] = Variable<int>(phone);
-    }
-    if (!nullToAbsent || card != null) {
-      map['card'] = Variable<int>(card);
-    }
+    map['phone'] = Variable<String>(phone);
+    map['card'] = Variable<String>(card);
     return map;
   }
 
@@ -172,12 +172,10 @@ class User extends DataClass implements Insertable<User> {
       id: Value(id),
       name: Value(name),
       lastname: Value(lastname),
-      years:
-          years == null && nullToAbsent ? const Value.absent() : Value(years),
+      years: Value(years),
       image: Value(image),
-      phone:
-          phone == null && nullToAbsent ? const Value.absent() : Value(phone),
-      card: card == null && nullToAbsent ? const Value.absent() : Value(card),
+      phone: Value(phone),
+      card: Value(card),
     );
   }
 
@@ -188,10 +186,10 @@ class User extends DataClass implements Insertable<User> {
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       lastname: serializer.fromJson<String>(json['lastname']),
-      years: serializer.fromJson<int?>(json['years']),
+      years: serializer.fromJson<int>(json['years']),
       image: serializer.fromJson<String>(json['image']),
-      phone: serializer.fromJson<int?>(json['phone']),
-      card: serializer.fromJson<int?>(json['card']),
+      phone: serializer.fromJson<String>(json['phone']),
+      card: serializer.fromJson<String>(json['card']),
     );
   }
   @override
@@ -201,10 +199,10 @@ class User extends DataClass implements Insertable<User> {
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
       'lastname': serializer.toJson<String>(lastname),
-      'years': serializer.toJson<int?>(years),
+      'years': serializer.toJson<int>(years),
       'image': serializer.toJson<String>(image),
-      'phone': serializer.toJson<int?>(phone),
-      'card': serializer.toJson<int?>(card),
+      'phone': serializer.toJson<String>(phone),
+      'card': serializer.toJson<String>(card),
     };
   }
 
@@ -212,18 +210,18 @@ class User extends DataClass implements Insertable<User> {
           {int? id,
           String? name,
           String? lastname,
-          Value<int?> years = const Value.absent(),
+          int? years,
           String? image,
-          Value<int?> phone = const Value.absent(),
-          Value<int?> card = const Value.absent()}) =>
+          String? phone,
+          String? card}) =>
       User(
         id: id ?? this.id,
         name: name ?? this.name,
         lastname: lastname ?? this.lastname,
-        years: years.present ? years.value : this.years,
+        years: years ?? this.years,
         image: image ?? this.image,
-        phone: phone.present ? phone.value : this.phone,
-        card: card.present ? card.value : this.card,
+        phone: phone ?? this.phone,
+        card: card ?? this.card,
       );
   @override
   String toString() {
@@ -259,10 +257,10 @@ class UsersCompanion extends UpdateCompanion<User> {
   final Value<int> id;
   final Value<String> name;
   final Value<String> lastname;
-  final Value<int?> years;
+  final Value<int> years;
   final Value<String> image;
-  final Value<int?> phone;
-  final Value<int?> card;
+  final Value<String> phone;
+  final Value<String> card;
   const UsersCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
@@ -276,21 +274,24 @@ class UsersCompanion extends UpdateCompanion<User> {
     this.id = const Value.absent(),
     required String name,
     required String lastname,
-    this.years = const Value.absent(),
+    required int years,
     required String image,
-    this.phone = const Value.absent(),
-    this.card = const Value.absent(),
+    required String phone,
+    required String card,
   })  : name = Value(name),
         lastname = Value(lastname),
-        image = Value(image);
+        years = Value(years),
+        image = Value(image),
+        phone = Value(phone),
+        card = Value(card);
   static Insertable<User> custom({
     Expression<int>? id,
     Expression<String>? name,
     Expression<String>? lastname,
     Expression<int>? years,
     Expression<String>? image,
-    Expression<int>? phone,
-    Expression<int>? card,
+    Expression<String>? phone,
+    Expression<String>? card,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -307,10 +308,10 @@ class UsersCompanion extends UpdateCompanion<User> {
       {Value<int>? id,
       Value<String>? name,
       Value<String>? lastname,
-      Value<int?>? years,
+      Value<int>? years,
       Value<String>? image,
-      Value<int?>? phone,
-      Value<int?>? card}) {
+      Value<String>? phone,
+      Value<String>? card}) {
     return UsersCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
@@ -341,10 +342,10 @@ class UsersCompanion extends UpdateCompanion<User> {
       map['image'] = Variable<String>(image.value);
     }
     if (phone.present) {
-      map['phone'] = Variable<int>(phone.value);
+      map['phone'] = Variable<String>(phone.value);
     }
     if (card.present) {
-      map['card'] = Variable<int>(card.value);
+      map['card'] = Variable<String>(card.value);
     }
     return map;
   }

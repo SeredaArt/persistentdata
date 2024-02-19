@@ -3,7 +3,7 @@ import 'package:persistentdata/model/users.dart';
 import 'package:persistentdata/ui/views/user_add.dart';
 
 class MyApp extends StatelessWidget {
-  MyApp({super.key});
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -13,9 +13,26 @@ class MyApp extends StatelessWidget {
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: const HomeView(),
-      routes: <String, WidgetBuilder>{
-        '/home': (BuildContext context) => const HomeView(),
-        '/add_user': (BuildContext context) => const UserViewPage(),
+      onGenerateRoute: (settings) {
+        switch (settings.name) {
+          case '/add_user':
+            {
+              final args = settings.arguments as ScreenArguments;
+              return MaterialPageRoute(
+                builder: (context) {
+                  return UserViewPage(
+                    insertUser: args.insertUser,
+                  );
+                },
+              );
+            }
+          default:
+            return MaterialPageRoute(
+              builder: (context) {
+                return const HomeView();
+              },
+            );
+        }
       },
     );
   }
@@ -36,8 +53,8 @@ class _HomeViewState extends State<HomeView> {
     _dataBase = MyDataBase();
   }
 
-  void _addUser(User user) async {
-    await _dataBase.insertUser(user);
+  Future<int> _insertUser(UsersCompanion user) async {
+    return await _dataBase.insertUser(user);
   }
 
   void _deleteUser(User user) async {
@@ -53,7 +70,7 @@ class _HomeViewState extends State<HomeView> {
       ),
       body: StreamBuilder<List<User>>(
         initialData: const [],
-        builder: (BuildContext context, users) {
+        builder: (BuildContext context, AsyncSnapshot<List<User>> users) {
           return ListView.builder(
             itemCount: users.data!.length,
             itemBuilder: (BuildContext context, int index) {
@@ -61,31 +78,30 @@ class _HomeViewState extends State<HomeView> {
               return ListTile(
                 leading:
                     CircleAvatar(foregroundImage: NetworkImage(user.image)),
-                title: Text('${user.name} + ${user.lastname}'),
+                title: Text('${user.name} ${user.lastname}'),
                 subtitle: Text(
-                  '${user.years} - ${user.phone}',
+                  '${user.years} ${user.phone}',
                 ),
                 trailing: Wrap(children: [
                   IconButton(
                       onPressed: () {},
-                      icon: Icon(Icons.change_circle_outlined)),
+                      icon: const Icon(Icons.change_circle_outlined)),
                   IconButton(
                       onPressed: () {
                         _deleteUser(user);
                       },
-                      icon: Icon(Icons.delete)),
+                      icon: const Icon(Icons.delete)),
                 ]),
               );
             },
           );
         },
-        stream: _dataBase.usersStream,
+        stream: _dataBase.usersStream(),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          setState(() {
-            Navigator.of(context).pushNamed('/add_user');
-          });
+          Navigator.of(context).pushNamed('/add_user',
+              arguments: ScreenArguments(insertUser: _insertUser));
         },
         tooltip: 'Increment',
         child: const Icon(Icons.add),

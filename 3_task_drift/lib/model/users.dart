@@ -10,10 +10,10 @@ class Users extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text().withLength(min: 1, max: 32)();
   TextColumn get lastname => text().withLength(min: 1, max: 32)();
-  IntColumn get years => integer().nullable()();
+  IntColumn get years => integer()();
   TextColumn get image => text()();
-  IntColumn get phone => integer().nullable()();
-  IntColumn get card => integer().nullable()();
+  TextColumn  get phone => text()();
+  TextColumn  get card => text()();
 }
 
 LazyDatabase _openConnection() {
@@ -29,11 +29,19 @@ class MyDataBase extends _$MyDataBase {
   MyDataBase() : super(_openConnection());
 
   Future<List<User>> get allUserEntries => select(users).get();
-  Future<int> insertUser(User user) => into(users).insert(user);
-  Stream<List<User>> get usersStream => select(users).watch();
+  Future<int> insertUser(user) => into(users).insert(user);
+  Stream<List<User>> usersStream() => select(users).watch();
   Future<bool> updateUser(User user) => update(users).replace(user);
   Future<int> deleteUser(int id) =>
       (delete(users)..where((u) => u.id.equals(id))).go();
+
+  Future<void> deleteEverything() {
+    return transaction(() async {
+      for (final table in allTables) {
+        await delete(table).go();
+      }
+    });
+  }
 
   @override
   int get schemaVersion => 1;
